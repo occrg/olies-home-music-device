@@ -25,8 +25,8 @@ def expect_connections(pexpect_child):
         passkey = pexpect_child.match.group(1)
         pexpect_child.send("yes\n")
 
-        service_auth_key(pexpect_child, "one")
-        service_auth_key(pexpect_child, "two")
+        expect_authorise_service_with_response(pexpect_child, "one")
+        expect_authorise_service_with_response(pexpect_child, "two")
 
         time.sleep(1)
 
@@ -44,10 +44,28 @@ def expect_connections(pexpect_child):
         pexpect_child.send("exit\n")
         pexpect_child.close()
 
-def service_auth_key(pexpect_child, service_key_request_num):
-    res_service_key_auth = pexpect_child.expect("Authorize service ([\w\W]{8}-[\w\W]{4}-[\w\W]{4}-[\w\W]{4}-[\w\W]{12}) \(yes\/no\):")
+def authorise_service_response(pexpect_child, service_key_request_num):
     service_key = pexpect_child.match.group(1)
     pexpect_child.send("yes\n")
     time.sleep(1)
+
+def expect_authorise_service(pexpect_child):
+    pexpect_child.expect("Authorize service ([\w\W]{8}-[\w\W]{4}-[\w\W]{4}-[\w\W]{4}-[\w\W]{12}) \(yes\/no\):")
+    return pexpect_child
+
+def expect_authorise_service_with_response(pexpect_child, service_key_request_num):
+    try:
+        expect_authorise_service(pexpect_child)
+        authorise_service_response(pexpect_child, service_key_request_num)
+    except BaseException as e:
+        if type(e).__name__ == "TIMEOUT":
+            print("Timeout for expect authorise service " + service_key_request_num + " call")
+        else:
+            print("Other error")
+            print(e)
+            print(traceback.format_exc())
+            pexpect_child.send("exit\n")
+            pexpect_child.close()
+            sys.exit(1)
 
 allow_bluetooth_connection()
