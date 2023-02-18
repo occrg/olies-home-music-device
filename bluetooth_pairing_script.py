@@ -22,7 +22,7 @@ def expect_connections(pexpect_child):
             "Confirm passkey ([\w\W]{6}) \(yes\/no\)",
             "Authorize service ([\w\W]{8}-[\w\W]{4}-[\w\W]{4}-[\w\W]{4}-[\w\W]{12}) \(yes\/no\):",
             pexpect.TIMEOUT
-        ])
+        ], timeout=30)
 
         if res == 0:
             pexpect_child.send("yes\n")
@@ -52,7 +52,7 @@ def expect_authorise_service(pexpect_child, service_key_request_num):
     res = pexpect_child.expect([
         "Authorize service ([\w\W]{8}-[\w\W]{4}-[\w\W]{4}-[\w\W]{4}-[\w\W]{12}) \(yes\/no\):",
         pexpect.TIMEOUT
-    ])
+    ], timeout=10)
 
     if res == 1:
         print("Timeout for expect authorise service " + service_key_request_num + " call")
