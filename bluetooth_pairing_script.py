@@ -72,4 +72,5 @@ def expect_authorise_service_with_response(pexpect_child, service_key_request_nu
         pexpect_child.close()
         sys.exit(1)
 
-allow_bluetooth_connection()
+if __name__ == "__main__":
+    allow_bluetooth_connection()
