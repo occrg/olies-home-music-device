@@ -1,7 +1,25 @@
+from gpiozero import Button
+from gpiozero import LED
 import pexpect
 import time
 import traceback
 import sys
+
+from config import config
+
+def initiate_button_loop():
+    button = Button(config["BLUETOOTH_BUTTON_NUM"])
+    light = LED(config["BLUETOOTH_LIGHT_NUM"])
+
+    while True:
+        print("restarted function")
+        light.off()
+        button.wait_for_press()
+        button.wait_for_release()
+        print("button pressed")
+        light.on()
+        allow_bluetooth_connection()
+
 
 def allow_bluetooth_connection():
     pexpect_child = initial_setup_commands()
@@ -42,7 +60,6 @@ def expect_connections(pexpect_child):
         print(traceback.format_exc())
         pexpect_child.send("exit\n")
         pexpect_child.close()
-        sys.exit(1)
 
 def authorise_service_response(pexpect_child):
     pexpect_child.send("yes\n")
@@ -70,7 +87,6 @@ def expect_authorise_service_with_response(pexpect_child, service_key_request_nu
         print(traceback.format_exc())
         pexpect_child.send("exit\n")
         pexpect_child.close()
-        sys.exit(1)
 
 if __name__ == "__main__":
-    allow_bluetooth_connection()
+    initiate_button_loop()
