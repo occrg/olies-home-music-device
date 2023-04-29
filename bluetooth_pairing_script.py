@@ -13,17 +13,17 @@ def initiate_button_loop():
 
     while True:
         print("restarted function")
-        light.off()
+        light.on()
         button.wait_for_press()
         button.wait_for_release()
         print("button pressed")
-        light.on()
-        allow_bluetooth_connection()
+        light.blink(1, 1)
+        allow_bluetooth_connection(button, light)
 
 
-def allow_bluetooth_connection():
+def allow_bluetooth_connection(button, light):
     pexpect_child = initial_setup_commands()
-    expect_connections(pexpect_child)
+    expect_connections(pexpect_child, button, light)
 
 def initial_setup_commands():
     pexpect_child = pexpect.spawn("bluetoothctl")
@@ -34,7 +34,7 @@ def initial_setup_commands():
     pexpect_child.send("discoverable on\n")
     return pexpect_child
 
-def expect_connections(pexpect_child):
+def expect_connections(pexpect_child, button, light):
     try:
         res = pexpect_child.expect([
             "Confirm passkey ([\w\W]{6}) \(yes\/no\)",
@@ -43,6 +43,10 @@ def expect_connections(pexpect_child):
         ], timeout=30)
 
         if res == 0:
+            light.blink(0.25, 0.25)
+            button.wait_for_press()
+            button.wait_for_release()
+            light.on()
             pexpect_child.send("yes\n")
             expect_authorise_service_with_response(pexpect_child, "one")
             expect_authorise_service_with_response(pexpect_child, "two")
