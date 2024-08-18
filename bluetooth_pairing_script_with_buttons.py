@@ -18,12 +18,13 @@ def initiate_button_loop():
         button.wait_for_release()
         print("button pressed")
         light.blink(1, 1)
-        allow_bluetooth_connection(button, light)
+        pairing_state(button, light)
 
 
-def allow_bluetooth_connection(button, light):
+def pairing_state(button, light):
     pexpect_child = initial_setup_commands()
     expect_connections(pexpect_child, button, light)
+    end_pairing_state(pexpect_child)
 
 def initial_setup_commands():
     pexpect_child = pexpect.spawn("bluetoothctl")
@@ -56,14 +57,10 @@ def expect_connections(pexpect_child, button, light):
         elif res == 2:
             print("Timeout for initial call. No attempt to connect.")
 
-        pexpect_child.close()
-
     except BaseException as e:
         print("Unknown error")
         print(e)
         print(traceback.format_exc())
-        pexpect_child.send("exit\n")
-        pexpect_child.close()
 
 def authorise_service_response(pexpect_child):
     pexpect_child.send("yes\n")
@@ -80,6 +77,11 @@ def expect_authorise_service(pexpect_child, service_key_request_num):
 
     return pexpect_child
 
+def end_pairing_state(pexpect_child):
+    time.sleep(5)
+    pexpect_child.send("bluetoothctl discoverable off\n")
+    pexpect_child.send("exit\n")
+    pexpect_child.close()
 
 def expect_authorise_service_with_response(pexpect_child, service_key_request_num):
     try:
